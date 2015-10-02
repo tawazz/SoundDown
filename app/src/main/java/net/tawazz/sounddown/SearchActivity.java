@@ -1,13 +1,25 @@
 package net.tawazz.sounddown;
 
+import android.app.ProgressDialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import java.io.InputStream;
+import java.net.URL;
 
 public class SearchActivity extends AppCompatActivity {
 
@@ -24,6 +36,22 @@ public class SearchActivity extends AppCompatActivity {
         searchBtn = (Button) view.findViewById(R.id.button_search);
         searchField =(EditText) view.findViewById(R.id.editText_search);
         songs = (ListView) view.findViewById(R.id.listView_songs);
+
+        String[] songsList = {"dont wann do there","candy shop", "3500","back to back","love me","problems","good for you"};
+        ListAdapter songsAdapter = new SongsAdapter(this,songsList);
+        songs.setAdapter(songsAdapter);
+
+        songs.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        String song = String.valueOf(parent.getItemAtPosition(position));
+                        Toast.makeText(SearchActivity.this, song, Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+
     }
 
     @Override
@@ -47,5 +75,6 @@ public class SearchActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
 }
