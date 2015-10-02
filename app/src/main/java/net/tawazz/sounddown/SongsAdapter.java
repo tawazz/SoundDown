@@ -11,17 +11,22 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
+
 import java.io.InputStream;
 import java.net.URL;
 
 /**
  * Created by tawanda on 2/10/15.
  */
-class SongsAdapter extends ArrayAdapter<String> {
+class SongsAdapter extends ArrayAdapter<Track>  {
 
     Bitmap bitmap;
 
-    public SongsAdapter(Context context, String[] songs) {
+    public SongsAdapter(Context context, Track[] songs) {
         super(context,R.layout.custom_row, songs);
     }
 
@@ -31,11 +36,11 @@ class SongsAdapter extends ArrayAdapter<String> {
         LayoutInflater inflator = LayoutInflater.from(getContext());
         View customView = inflator.inflate(R.layout.custom_row, parent, false);
 
-        String song = getItem(position);
+        Track song = getItem(position);
         TextView details = (TextView) customView.findViewById(R.id.textView_details);
-        ImageView artwork = (ImageView) customView.findViewById(R.id.imageView_artwork);
-        new LoadImage().execute("https://i1.sndcdn.com/artworks-000124647570-nlo2r5-large.jpg");
-        details.setText(song);
+        final ImageView artwork = (ImageView) customView.findViewById(R.id.imageView_artwork);
+        new LoadImage().execute(song.getArtworkUrl());
+        details.setText(song.getDetails());
         artwork.setImageBitmap(bitmap);
 
         return customView;
@@ -58,7 +63,8 @@ class SongsAdapter extends ArrayAdapter<String> {
         }
 
         protected void onPostExecute(Bitmap image) {
-
+            super.onPostExecute(image);
+            bitmap = image;
         }
     }
 }

@@ -1,11 +1,10 @@
 package net.tawazz.sounddown;
 
-import android.app.ProgressDialog;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +17,24 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class SearchActivity extends AppCompatActivity {
@@ -37,7 +53,16 @@ public class SearchActivity extends AppCompatActivity {
         searchField =(EditText) view.findViewById(R.id.editText_search);
         songs = (ListView) view.findViewById(R.id.listView_songs);
 
-        String[] songsList = {"dont wann do there","candy shop", "3500","back to back","love me","problems","good for you"};
+        final Track[] songsList = new Track[2];
+        songsList[0] = new Track("Drama Feat. Drake",
+                "https://i1.sndcdn.com/artworks-000124647570-nlo2r5-large.jpg",
+                "http://tawazz.net/fasttube/download?title=Drama%20Feat.%20Drake&url=https://api.soundcloud.com/tracks/216772566/stream"
+        );
+        songsList[1] = new Track("Casey Veggies - Tied Up Ft. Dej Loaf",
+                "",
+                "http://tawazz.net/fasttube/download?title=Casey%20Veggies%20-%20Tied%20Up%20Ft.%20Dej%20Loaf&url=https://api.soundcloud.com/tracks/202972853/stream"
+        );
+
         ListAdapter songsAdapter = new SongsAdapter(this,songsList);
         songs.setAdapter(songsAdapter);
 
@@ -46,7 +71,13 @@ public class SearchActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         String song = String.valueOf(parent.getItemAtPosition(position));
-                        Toast.makeText(SearchActivity.this, song, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(SearchActivity.this, songsList[position].getDetails(), Toast.LENGTH_SHORT).show();
+                        try {
+                            getSong(songsList[position]);
+                            Toast.makeText(SearchActivity.this, "downloading", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
         );
@@ -76,5 +107,36 @@ public class SearchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void getSong(Track song){
+
+
+        //new URL("http://tawazz.net/fasttube/download?title=Travis%20Scott%20-%20Antidote&url=https://api.soundcloud.com/tracks/211417319/stream").getContent();
+        String filename = song.getDetails()+".mp3";
+        String fileUrl = song.getStreamUrl();
+        new DownloadFile().execute(fileUrl,filename);
+
+    }
+
+    private class DownloadFile extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            String fileUrl = strings[0];   // -> http://maven.apache.org/maven-1.x/maven.pdf
+            String fileName = strings[1];  // -> maven.pdf
+            String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+            File folder = new File(extStorageDirectory, "SoundDown");
+            folder.mkdir();
+
+            File mp3 = new File(folder, fileName);
+
+            try{
+                mp3.createNewFile();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+            FileDownloader.downloadFile(fileUrl,mp3);
+            return null;
+        }
+    }
 
 }
