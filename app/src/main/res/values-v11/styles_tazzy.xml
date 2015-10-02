@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="AutoCompleteTextViewtazzy" parent="android:Widget.Holo.Light.AutoCompleteTextView">
+      <item name="android:dropDownSelector">@drawable/tazzy_list_selector_holo_light</item>
+	    <item name="android:background">@drawable/tazzy_edit_text_holo_light</item>
+  </style>
+
+  <style name="Buttontazzy" parent="android:Widget.Holo.Light.Button">
+	  <item name="android:background">@drawable/tazzy_btn_default_holo_light</item>
+  </style>
+
+  <style name="ImageButtontazzy" parent="android:Widget.Holo.Light.ImageButton">
+	  <item name="android:background">@drawable/tazzy_btn_default_holo_light</item>
+  </style>
+
+  <style name="Spinnertazzy" parent="android:Widget.Holo.Light.Spinner">
+      <item name="android:background">@drawable/tazzy_spinner_background_holo_light</item>
+      <item name="android:dropDownSelector">@drawable/tazzy_list_selector_holo_light</item>
+  </style>
+
+  <style name="ProgressBartazzy" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
+      <item name="android:progressDrawable">@drawable/tazzy_progress_horizontal_holo_light</item>
+      <item name="android:indeterminateDrawable">@drawable/tazzy_progress_indeterminate_horizontal_holo_light</item>
+  </style>
+
+</resources>

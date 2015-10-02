@@ -1,5 +1,6 @@
 package net.tawazz.sounddown;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +26,10 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -36,6 +41,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 public class SearchActivity extends AppCompatActivity {
 
@@ -43,6 +49,9 @@ public class SearchActivity extends AppCompatActivity {
     private EditText searchField;
     private ListView songs;
     private View view;
+    private String Json;
+    private Track[] tracks;
+    ProgressDialog pDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,20 +61,12 @@ public class SearchActivity extends AppCompatActivity {
         searchBtn = (Button) view.findViewById(R.id.button_search);
         searchField =(EditText) view.findViewById(R.id.editText_search);
         songs = (ListView) view.findViewById(R.id.listView_songs);
+        tracks = null;
 
-        final Track[] songsList = new Track[2];
-        songsList[0] = new Track("Drama Feat. Drake",
-                "https://i1.sndcdn.com/artworks-000124647570-nlo2r5-large.jpg",
-                "http://tawazz.net/fasttube/download?title=Drama%20Feat.%20Drake&url=https://api.soundcloud.com/tracks/216772566/stream"
-        );
-        songsList[1] = new Track("Casey Veggies - Tied Up Ft. Dej Loaf",
-                "",
-                "http://tawazz.net/fasttube/download?title=Casey%20Veggies%20-%20Tied%20Up%20Ft.%20Dej%20Loaf&url=https://api.soundcloud.com/tracks/202972853/stream"
-        );
-
-        ListAdapter songsAdapter = new SongsAdapter(this,songsList);
-        songs.setAdapter(songsAdapter);
-
+        if(tracks != null) {
+            ListAdapter songsAdapter = new SongsAdapter(this, tracks);
+            songs.setAdapter(songsAdapter);
+        }
         songs.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
                     @Override
@@ -73,8 +74,13 @@ public class SearchActivity extends AppCompatActivity {
                         String song = String.valueOf(parent.getItemAtPosition(position));
                         //Toast.makeText(SearchActivity.this, songsList[position].getDetails(), Toast.LENGTH_SHORT).show();
                         try {
-                            getSong(songsList[position]);
-                            Toast.makeText(SearchActivity.this, "downloading", Toast.LENGTH_SHORT).show();
+                            getSong(tracks[position]);
+                            //Toast.makeText(SearchActivity.this, "downloading", Toast.LENGTH_SHORT).show();
+                            pDialog = new ProgressDialog(SearchActivity.this);
+                            pDialog.setMessage("Downloading" + tracks[position].getDetails() + " ....");
+                            pDialog.setCancelable(false);
+                            pDialog.setCanceledOnTouchOutside(false);
+                            pDialog.show();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -82,7 +88,78 @@ public class SearchActivity extends AppCompatActivity {
                 }
         );
 
+        searchBtn.setOnClickListener(new View.OnClickListener(){
 
+            @Override
+            public void onClick(View v) {
+                searchSongs();
+            }
+        });
+
+    }
+
+    private void jsonToTracks() {
+        if(!Json.isEmpty()){
+            try {
+                JSONObject jsonRootObject = new JSONObject(Json);
+
+                //Get the instance of JSONArray that contains JSONObjects
+                JSONArray jsonArray = jsonRootObject.optJSONArray("tracks");
+
+                tracks = new Track[jsonArray.length()];
+
+                //Iterate the jsonArray and print the info of JSONObjects
+                for(int i=0; i < jsonArray.length(); i++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                    String title = jsonObject.optString("title").toString();
+                    String artworkUrl = jsonObject.optString("artwork_url").toString();
+                    String streamUrl = "http://tawazz.net/fasttube/download?title="+URLEncoder.encode(title)+"&url="+jsonObject.optString("stream_url").toString();
+
+                    tracks[i] = new Track(title,artworkUrl,streamUrl);
+                }
+            } catch (JSONException e) {e.printStackTrace();}
+        }
+
+    }
+
+    private void searchSongs() {
+        String query = URLEncoder.encode(searchField.getText().toString());
+        Json ="";
+        pDialog = new ProgressDialog(SearchActivity.this);
+        pDialog.setMessage("Searching ....");
+        pDialog.setCancelable(false);
+        pDialog.setCanceledOnTouchOutside(false);
+        pDialog.show();
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url ="http://tawazz.net/fasttube/api/search/"+query;
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Json = response;
+                        jsonToTracks();
+                        if(tracks != null) {
+                            ListAdapter songsAdapter = new SongsAdapter(getApplicationContext(), tracks);
+                            songs.setAdapter(songsAdapter);
+                            songs.invalidateViews();
+                            pDialog.dismiss();
+                        }
+                        else {
+                            Toast.makeText(SearchActivity.this,"No results",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Json = "";
+            }
+        });
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
     }
 
     @Override
@@ -135,6 +212,7 @@ public class SearchActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             FileDownloader.downloadFile(fileUrl,mp3);
+            pDialog.dismiss();
             return null;
         }
     }
