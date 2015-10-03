@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -77,7 +78,7 @@ public class SearchActivity extends AppCompatActivity {
                             getSong(tracks[position]);
                             //Toast.makeText(SearchActivity.this, "downloading", Toast.LENGTH_SHORT).show();
                             pDialog = new ProgressDialog(SearchActivity.this);
-                            pDialog.setMessage("Downloading" + tracks[position].getDetails() + " ....");
+                            pDialog.setMessage("Downloading " + tracks[position].getDetails() + " ....");
                             pDialog.setCancelable(false);
                             pDialog.setCanceledOnTouchOutside(false);
                             pDialog.show();
@@ -88,11 +89,23 @@ public class SearchActivity extends AppCompatActivity {
                 }
         );
 
-        searchBtn.setOnClickListener(new View.OnClickListener(){
+        searchBtn.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 searchSongs();
+            }
+        });
+
+        searchField.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    searchSongs();
+                    return true;
+                }
+                return false;
             }
         });
 
@@ -125,41 +138,42 @@ public class SearchActivity extends AppCompatActivity {
 
     private void searchSongs() {
         String query = URLEncoder.encode(searchField.getText().toString());
-        Json ="";
-        pDialog = new ProgressDialog(SearchActivity.this);
-        pDialog.setMessage("Searching ....");
-        pDialog.setCancelable(false);
-        pDialog.setCanceledOnTouchOutside(false);
-        pDialog.show();
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url ="http://tawazz.net/fasttube/api/search/"+query;
+        if(!query.isEmpty()) {
+            Json = "";
+            pDialog = new ProgressDialog(SearchActivity.this);
+            pDialog.setMessage("Searching ....");
+            pDialog.setCancelable(false);
+            pDialog.setCanceledOnTouchOutside(false);
+            pDialog.show();
+            // Instantiate the RequestQueue.
+            RequestQueue queue = Volley.newRequestQueue(this);
+            String url = "http://tawazz.net/fasttube/api/search/" + query;
 
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Json = response;
-                        jsonToTracks();
-                        if(tracks != null) {
-                            ListAdapter songsAdapter = new SongsAdapter(getApplicationContext(), tracks);
-                            songs.setAdapter(songsAdapter);
-                            songs.invalidateViews();
-                            pDialog.dismiss();
+            // Request a string response from the provided URL.
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            Json = response;
+                            jsonToTracks();
+                            if (tracks != null) {
+                                ListAdapter songsAdapter = new SongsAdapter(getApplicationContext(), tracks);
+                                songs.setAdapter(songsAdapter);
+                                songs.invalidateViews();
+                                pDialog.dismiss();
+                            } else {
+                                Toast.makeText(SearchActivity.this, "No results", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                        else {
-                            Toast.makeText(SearchActivity.this,"No results",Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Json = "";
-            }
-        });
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Json = "";
+                }
+            });
+            // Add the request to the RequestQueue.
+            queue.add(stringRequest);
+        }
     }
 
     @Override
