@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="EditTexttazzy" parent="android:Widget.EditText">
+	  <item name="android:background">@drawable/tazzy_edit_text_holo_light</item>
+	  <item name="android:textColor">#000000</item>
+  </style>
+
+  <style name="AutoCompleteTextViewtazzy" parent="android:Widget.AutoCompleteTextView">
+      <item name="android:dropDownSelector">@drawable/tazzy_list_selector_holo_light</item>
+	  <item name="android:background">@drawable/tazzy_edit_text_holo_light</item>
+	  <item name="android:textColor">#000000</item>
+  </style>
+
+  <style name="CheckBoxtazzy" parent="android:Widget.CompoundButton.CheckBox">
+      <item name="android:button">@drawable/tazzy_btn_check_holo_light</item>
+  </style>
+
+  <style name="RadioButtontazzy" parent="android:Widget.CompoundButton.RadioButton">
+      <item name="android:button">@drawable/tazzy_btn_radio_holo_light</item>
+  </style>
+
+  <style name="Buttontazzy" parent="android:Widget.Button">
+	  <item name="android:background">@drawable/tazzy_btn_default_holo_light</item>
+	  <item name="android:minHeight">48dip</item>
+	  <item name="android:minWidth">64dip</item>
+	  <item name="android:textColor">#000000</item>
+  </style>
+
+  <style name="ImageButtontazzy" parent="android:Widget.ImageButton">
+	  <item name="android:background">@drawable/tazzy_btn_default_holo_light</item>
+  </style>
+
+  <style name="Spinnertazzy" parent="android:Widget.Spinner">
+      <item name="android:background">@drawable/tazzy_spinner_background_holo_light</item>
+      <item name="android:dropDownSelector">@drawable/tazzy_list_selector_holo_light</item>
+  </style>
+
+  <style name="SpinnerDropDownItemtazzy" parent="android:Widget.DropDownItem.Spinner">
+      <item name="android:checkMark">@drawable/tazzy_btn_radio_holo_light</item>
+  </style>
+  <style name="ProgressBartazzy" parent="android:Widget.ProgressBar.Horizontal">
+      <item name="android:progressDrawable">@drawable/tazzy_progress_horizontal_holo_light</item>
+      <item name="android:indeterminateDrawable">@drawable/tazzy_progress_indeterminate_horizontal_holo_light</item>
+      <item name="android:minHeight">16dip</item>
+      <item name="android:maxHeight">16dip</item>
+  </style>
+
+</resources>

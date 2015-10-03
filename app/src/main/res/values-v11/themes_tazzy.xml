@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <style name="tazzy" parent="@style/_tazzy"/>
+
+  <style name="_tazzy" parent="Theme.AppCompat.Light">
+
+    <item name="android:editTextBackground">@drawable/tazzy_edit_text_holo_light</item>
+
+    <item name="android:textColorHighlight">#99eb6864</item>
+    <item name="android:textSelectHandleLeft">@drawable/tazzy_text_select_handle_left</item>
+    <item name="android:textSelectHandleRight">@drawable/tazzy_text_select_handle_right</item>
+    <item name="android:textSelectHandle">@drawable/tazzy_text_select_handle_middle</item>
+
+    <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewtazzy</item>
+
+    <item name="android:listChoiceIndicatorMultiple">@drawable/tazzy_btn_check_holo_light</item>
+
+    <item name="android:listChoiceIndicatorSingle">@drawable/tazzy_btn_radio_holo_light</item>
+
+    <item name="android:buttonStyle">@style/Buttontazzy</item>
+
+    <item name="android:imageButtonStyle">@style/ImageButtontazzy</item>
+
+    <item name="android:dropDownSpinnerStyle">@style/Spinnertazzy</item>
+
+    <item name="android:progressBarStyleHorizontal">@style/ProgressBartazzy</item>
+
+    <item name="android:fastScrollThumbDrawable">@drawable/tazzy_fastscroll_thumb_holo</item>
+
+  </style>
+
+</resources>
