@@ -15,8 +15,9 @@
         android:hint="@string/search"
         android:singleLine="true"
         android:layout_toStartOf="@+id/button_search"
-        android:layout_alignBottom="@+id/button_search"
-        style="@style/Widget.AppCompat.EditText" />
+        style="@style/Widget.AppCompat.EditText"
+        android:textColorHint="@color/tazzy_color"
+        android:textColor="@color/tazzy_color" />
 
     <Button
         android:layout_width="wrap_content"
@@ -25,15 +26,16 @@
         android:id="@+id/button_search"
         android:layout_alignEnd="@+id/listView_songs"
         android:text="@string/search"
-        android:padding="16dp"
-        android:textColor="@color/primary_material_light" />
+        android:padding="4dp"
+        android:textColor="@color/primary_material_light"
+        android:layout_alignBottom="@+id/editText_search"
+        android:layout_alignParentTop="true" />
 
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/listView_songs"
-        android:layout_below="@+id/button_search"
-        android:layout_marginTop="34dp"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editText_search" />
 
 </RelativeLayout>
