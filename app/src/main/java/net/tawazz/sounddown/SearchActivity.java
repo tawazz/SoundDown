@@ -78,7 +78,7 @@ public class SearchActivity extends AppCompatActivity {
                             getSong(tracks[position]);
                             //Toast.makeText(SearchActivity.this, "downloading", Toast.LENGTH_SHORT).show();
                             pDialog = new ProgressDialog(SearchActivity.this);
-                            pDialog.setMessage("Downloading " + tracks[position].getDetails() + " ....");
+                            pDialog.setMessage("Downloading " + tracks[position].getTitle() + " ....");
                             pDialog.setCancelable(false);
                             pDialog.setCanceledOnTouchOutside(false);
                             pDialog.show();
@@ -128,8 +128,10 @@ public class SearchActivity extends AppCompatActivity {
                     String title = jsonObject.optString("title").toString();
                     String artworkUrl = jsonObject.optString("artwork_url").toString();
                     String streamUrl = "http://tawazz.net/fasttube/download?title="+URLEncoder.encode(title)+"&url="+jsonObject.optString("stream_url").toString();
-
-                    tracks[i] = new Track(title,artworkUrl,streamUrl);
+                    String likes = jsonObject.optString("likes_count").toString();
+                    String time = jsonObject.optString("duration").toString();
+                    String user = jsonObject.getJSONObject("user").optString("username").toString();
+                    tracks[i] = new Track(user,title,artworkUrl,streamUrl,likes,time);
                 }
             } catch (JSONException e) {e.printStackTrace();}
         }
@@ -202,7 +204,7 @@ public class SearchActivity extends AppCompatActivity {
 
 
         //new URL("http://tawazz.net/fasttube/download?title=Travis%20Scott%20-%20Antidote&url=https://api.soundcloud.com/tracks/211417319/stream").getContent();
-        String filename = song.getDetails()+".mp3";
+        String filename = song.getTitle()+".mp3";
         String fileUrl = song.getStreamUrl();
         new DownloadFile().execute(fileUrl,filename);
 

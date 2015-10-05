@@ -26,10 +26,16 @@ class SongsAdapter extends ArrayAdapter<Track>  {
         View customView = inflator.inflate(R.layout.custom_row, parent, false);
 
         Track song = getItem(position);
-        TextView details = (TextView) customView.findViewById(R.id.textView_details);
+        TextView title = (TextView) customView.findViewById(R.id.textView_title);
+        TextView user = (TextView) customView.findViewById(R.id.textView_user);
+        TextView time = (TextView) customView.findViewById(R.id.textView_time);
+        TextView likes = (TextView) customView.findViewById(R.id.textView_likes);
         final ImageView artwork = (ImageView) customView.findViewById(R.id.imageView_artwork);
-        details.setText(song.getDetails());
         artwork.setImageBitmap(song.getArtwork());
+        title.setText(song.getTitle());
+        user.setText(song.getUser());
+        time.setText(song.getTime());
+        likes.setText(song.getLike());
 
         return customView;
     }

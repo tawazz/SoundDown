@@ -6,28 +6,28 @@ import android.os.AsyncTask;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by tawanda on 2/10/15.
  */
 public class Track {
 
-    private String details,artworkUrl,streamUrl;
+    private String title;
+    private String artworkUrl;
+    private String streamUrl;
+    private String user;
+    private String like;
+    private String time;
     private Bitmap artwork;
 
-    public Track(String songDetails,String artwork, String mp3){
-        details = songDetails;
-        artworkUrl = artwork;
+    public Track(String user,String title,String artwork, String mp3, String likes, String time){
+        this.user = user;
+        this.title = title;
+        new GetArtwork().execute(artwork);
         streamUrl = mp3;
-        new GetArtwork().execute(artworkUrl);
-    }
-
-    public String getDetails() {
-        return details;
-    }
-
-    public void setDetails(String details) {
-        this.details = details;
+        this.like = likes;
+        this.time = time;
     }
 
     public String getArtworkUrl() {
@@ -45,6 +45,45 @@ public class Track {
     public Bitmap getArtwork() {
 
         return artwork;
+    }
+    public String getTime() {
+        int time = Integer.parseInt(this.time);
+        int mins = (time/60000)%60;
+        int secs = (time%60000)/1000;
+
+        if(secs < 10){
+            return mins+":0"+secs;
+        }else{
+            return mins+":"+secs;
+        }
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getLike() {
+        return like;
+    }
+
+    public void setLike(String like) {
+        this.like = like;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public void setStreamUrl(String streamUrl) {
