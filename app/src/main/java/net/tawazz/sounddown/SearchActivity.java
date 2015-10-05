@@ -1,10 +1,14 @@
 package net.tawazz.sounddown;
 
 import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -17,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -47,7 +52,7 @@ import java.net.URLEncoder;
 public class SearchActivity extends AppCompatActivity {
 
     private Button searchBtn;
-    private EditText searchField;
+    private TextView emptyText;
     private ListView songs;
     private View view;
     private String Json;
@@ -58,10 +63,15 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = URLEncoder.encode(intent.getStringExtra(SearchManager.QUERY));
+            searchSongs(query);
+        }
         view = getWindow().getDecorView().findViewById(android.R.id.content);
-        searchBtn = (Button) view.findViewById(R.id.button_search);
-        searchField =(EditText) view.findViewById(R.id.editText_search);
         songs = (ListView) view.findViewById(R.id.listView_songs);
+        emptyText = (TextView) view.findViewById(R.id.textView_empty);
+        songs.setEmptyView(emptyText);
         tracks = null;
 
         if(tracks != null) {
@@ -88,26 +98,6 @@ public class SearchActivity extends AppCompatActivity {
                     }
                 }
         );
-
-        searchBtn.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                searchSongs();
-            }
-        });
-
-        searchField.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    searchSongs();
-                    return true;
-                }
-                return false;
-            }
-        });
 
     }
 
@@ -138,8 +128,8 @@ public class SearchActivity extends AppCompatActivity {
 
     }
 
-    private void searchSongs() {
-        String query = URLEncoder.encode(searchField.getText().toString());
+    private void searchSongs(String query) {
+
         if(!query.isEmpty()) {
             Json = "";
             pDialog = new ProgressDialog(SearchActivity.this);
@@ -182,6 +172,13 @@ public class SearchActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_search, menu);
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+
         return true;
     }
 
