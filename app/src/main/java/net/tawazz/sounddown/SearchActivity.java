@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -226,6 +228,13 @@ public class SearchActivity extends AppCompatActivity {
             }
             FileDownloader.downloadFile(fileUrl,mp3);
             pDialog.dismiss();
+            // Just example, you should parse file name for extension
+            String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(".mp3");
+
+            Intent intent = new Intent();
+            intent.setAction(android.content.Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.fromFile(mp3), mime);
+            startActivityForResult(intent, 10);
             return null;
         }
     }

@@ -5,7 +5,7 @@
 
   <style name="tazzy" parent="@style/_tazzy"/>
 
-  <style name="_tazzy" parent="Theme.AppCompat.Light">
+  <style name="_tazzy" parent="Theme.AppCompat.Light.DarkActionBar">
 
     <item name="android:editTextBackground">@drawable/tazzy_edit_text_holo_light</item>
 

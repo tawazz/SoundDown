@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="tazzy_color">#eb6864</color>
+    <color name="tazzy_color">#FF5722</color>
+    <color name="primary_color">#FF5722</color>
+    <color name="primary_color_dark">#E64A19</color>
+    <color name="primary_color_accent">#FFCCBC</color>
 </resources>
