@@ -1,9 +1,11 @@
 package net.tawazz.sounddown;
 
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -88,12 +90,6 @@ public class SearchActivity extends AppCompatActivity {
                         //Toast.makeText(SearchActivity.this, songsList[position].getDetails(), Toast.LENGTH_SHORT).show();
                         try {
                             getSong(tracks[position]);
-                            //Toast.makeText(SearchActivity.this, "downloading", Toast.LENGTH_SHORT).show();
-                            pDialog = new ProgressDialog(SearchActivity.this);
-                            pDialog.setMessage("Downloading " + tracks[position].getTitle() + " ....");
-                            pDialog.setCancelable(false);
-                            pDialog.setCanceledOnTouchOutside(false);
-                            pDialog.show();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -205,38 +201,71 @@ public class SearchActivity extends AppCompatActivity {
         //new URL("http://tawazz.net/fasttube/download?title=Travis%20Scott%20-%20Antidote&url=https://api.soundcloud.com/tracks/211417319/stream").getContent();
         String filename = song.getTitle()+".mp3";
         String fileUrl = song.getStreamUrl();
-        new DownloadFile().execute(fileUrl,filename);
 
+        Toast.makeText(SearchActivity.this,"Downloading...",Toast.LENGTH_SHORT).show();
+        new DownloadFile().execute(fileUrl, filename);
+
+    }
+
+    public void downloadManager(String filename, String fileUrl){
+
+        Uri fileUri = Uri.parse(fileUrl);
+        DownloadManager.Request r = new DownloadManager.Request(fileUri);
+
+        // This put the download in the same Download dir the browser uses
+        r.setDestinationInExternalPublicDir("SoundDown",filename);
+
+        // When downloading music and videos they will be listed in the player
+        // (Seems to be available since Honeycomb only)
+        r.allowScanningByMediaScanner();
+
+        // Notify user when download is completed
+        // (Seems to be available since Honeycomb only)
+        r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+        // Start download
+        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        dm.enqueue(r);
+    }
+
+    public  void downloadInpStream(String fileName, String fileUrl){
+
+        String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+        File folder = new File(extStorageDirectory, "SoundDown");
+        folder.mkdir();
+
+        File mp3 = new File(folder, fileName);
+
+        try {
+            mp3.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        FileDownloader.downloadFile(fileUrl, mp3);
+        pDialog.dismiss();
+        Intent intent = new Intent();
+        // Intent chooser = new Intent();
+
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(mp3), "audio/*");
+        //chooser.createChooser(intent, "Play song");
+        // Verify the intent will resolve to at least one activity
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     private class DownloadFile extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... strings) {
-            String fileUrl = strings[0];   // -> http://maven.apache.org/maven-1.x/maven.pdf
-            String fileName = strings[1];  // -> maven.pdf
-            String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-            File folder = new File(extStorageDirectory, "SoundDown");
-            folder.mkdir();
+            String fileUrl = strings[0];
+            String fileName = strings[1];
 
-            File mp3 = new File(folder, fileName);
-
-            try{
-                mp3.createNewFile();
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-            FileDownloader.downloadFile(fileUrl,mp3);
-            pDialog.dismiss();
-            // Just example, you should parse file name for extension
-            String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(".mp3");
-
-            Intent intent = new Intent();
-            intent.setAction(android.content.Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.fromFile(mp3), mime);
-            startActivity(intent);
+            downloadManager(fileName,fileUrl);
             return null;
         }
+
     }
 
 }
