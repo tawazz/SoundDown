@@ -234,7 +234,7 @@ public class SearchActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_VIEW);
             intent.setDataAndType(Uri.fromFile(mp3), mime);
-            startActivityForResult(intent, 10);
+            startActivity(intent);
             return null;
         }
     }
