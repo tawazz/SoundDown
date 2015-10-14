@@ -5,24 +5,15 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -39,23 +30,10 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 
 public class SearchActivity extends AppCompatActivity {
 
-    private Button searchBtn;
     private TextView emptyText;
     private ListView songs;
     private View view;
@@ -86,8 +64,6 @@ public class SearchActivity extends AppCompatActivity {
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        String song = String.valueOf(parent.getItemAtPosition(position));
-                        //Toast.makeText(SearchActivity.this, songsList[position].getDetails(), Toast.LENGTH_SHORT).show();
                         try {
                             getSong(tracks[position]);
                         } catch (Exception e) {
@@ -100,28 +76,28 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void jsonToTracks() {
-        if(!Json.isEmpty()){
-            try {
-                JSONObject jsonRootObject = new JSONObject(Json);
+        if(!Json.isEmpty()) try {
+            JSONObject jsonRootObject = new JSONObject(Json);
 
-                //Get the instance of JSONArray that contains JSONObjects
-                JSONArray jsonArray = jsonRootObject.optJSONArray("tracks");
+            //Get the instance of JSONArray that contains JSONObjects
+            JSONArray jsonArray = jsonRootObject.optJSONArray("tracks");
 
-                tracks = new Track[jsonArray.length()];
+            tracks = new Track[jsonArray.length()];
 
-                //Iterate the jsonArray and print the info of JSONObjects
-                for(int i=0; i < jsonArray.length(); i++){
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+            //Iterate the jsonArray and print the info of JSONObjects
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                    String title = jsonObject.optString("title").toString();
-                    String artworkUrl = jsonObject.optString("artwork_url").toString();
-                    String streamUrl = "http://tawazz.net/fasttube/download?title="+URLEncoder.encode(title)+"&url="+jsonObject.optString("stream_url").toString();
-                    String likes = jsonObject.optString("likes_count").toString();
-                    String time = jsonObject.optString("duration").toString();
-                    String user = jsonObject.getJSONObject("user").optString("username").toString();
-                    tracks[i] = new Track(user,title,artworkUrl,streamUrl,likes,time);
-                }
-            } catch (JSONException e) {e.printStackTrace();}
+                String title = jsonObject.optString("title");
+                String artworkUrl = jsonObject.optString("artwork_url").toString();
+                String streamUrl = "http://tawazz.net/fasttube/download?title=" + URLEncoder.encode(title) + "&url=" + jsonObject.optString("stream_url").toString();
+                String likes = jsonObject.optString("likes_count").toString();
+                String time = jsonObject.optString("duration").toString();
+                String user = jsonObject.getJSONObject("user").optString("username").toString();
+                tracks[i] = new Track(user, title, artworkUrl, streamUrl, likes, time);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
     }
@@ -196,9 +172,6 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     public void getSong(Track song){
-
-
-        //new URL("http://tawazz.net/fasttube/download?title=Travis%20Scott%20-%20Antidote&url=https://api.soundcloud.com/tracks/211417319/stream").getContent();
         String filename = song.getTitle()+".mp3";
         String fileUrl = song.getStreamUrl();
 
@@ -226,33 +199,6 @@ public class SearchActivity extends AppCompatActivity {
         // Start download
         DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         dm.enqueue(r);
-    }
-
-    public  void downloadInpStream(String fileName, String fileUrl){
-
-        String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-        File folder = new File(extStorageDirectory, "SoundDown");
-        folder.mkdir();
-
-        File mp3 = new File(folder, fileName);
-
-        try {
-            mp3.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        FileDownloader.downloadFile(fileUrl, mp3);
-        pDialog.dismiss();
-        Intent intent = new Intent();
-        // Intent chooser = new Intent();
-
-        intent.setAction(android.content.Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(mp3), "audio/*");
-        //chooser.createChooser(intent, "Play song");
-        // Verify the intent will resolve to at least one activity
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
     }
 
     private class DownloadFile extends AsyncTask<String, Void, Void> {
