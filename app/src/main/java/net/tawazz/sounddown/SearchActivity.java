@@ -3,13 +3,19 @@ package net.tawazz.sounddown;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,9 +33,22 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 
+import net.tawazz.sounddown.mp3agic.ID3Wrapper;
+import net.tawazz.sounddown.mp3agic.ID3v1Tag;
+import net.tawazz.sounddown.mp3agic.ID3v23Tag;
+import net.tawazz.sounddown.mp3agic.InvalidDataException;
+import net.tawazz.sounddown.mp3agic.Mp3File;
+import net.tawazz.sounddown.mp3agic.NotSupportedException;
+import net.tawazz.sounddown.mp3agic.UnsupportedTagException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URLEncoder;
 
 public class SearchActivity extends AppCompatActivity {
@@ -65,7 +84,7 @@ public class SearchActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         try {
-                            getSong(tracks[position]);
+                            getSong(tracks[position],position);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -171,34 +190,87 @@ public class SearchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void getSong(Track song){
+    public void getSong(Track song,int pos){
         String filename = song.getTitle()+".mp3";
         String fileUrl = song.getStreamUrl();
+        String trackId = pos+"";
 
         Toast.makeText(SearchActivity.this,"Downloading...",Toast.LENGTH_SHORT).show();
-        new DownloadFile().execute(fileUrl, filename);
+        new DownloadFile().execute(fileUrl, filename,trackId);
 
     }
 
-    public void downloadManager(String filename, String fileUrl){
+    public void downloadManager(final String filename, String fileUrl, String pos){
 
         Uri fileUri = Uri.parse(fileUrl);
-        DownloadManager.Request r = new DownloadManager.Request(fileUri);
+       final DownloadManager.Request r = new DownloadManager.Request(fileUri);
 
         // This put the download in the same Download dir the browser uses
-        r.setDestinationInExternalPublicDir("SoundDown",filename);
-
-        // When downloading music and videos they will be listed in the player
-        // (Seems to be available since Honeycomb only)
-        r.allowScanningByMediaScanner();
+        r.setDestinationInExternalPublicDir("SoundDown", filename);
 
         // Notify user when download is completed
         // (Seems to be available since Honeycomb only)
         r.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
         // Start download
-        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        final DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         dm.enqueue(r);
+        final String trackId = pos;
+        BroadcastReceiver onComplete=new BroadcastReceiver() {
+            public void onReceive(Context ctxt, Intent intent) {
+                String filePath =Environment.getExternalStorageDirectory()+"/SoundDown/";
+                try {
+                    Mp3File mp3File = new Mp3File(filePath+filename);
+                    ID3Wrapper newId3Wrapper = new ID3Wrapper(new ID3v1Tag(), new ID3v23Tag());
+                    newId3Wrapper.setTitle(filename);
+                    newId3Wrapper.setAlbumImage(getImage(trackId), "image/png");
+                    newId3Wrapper.setArtist(tracks[Integer.parseInt(trackId)].getUser());
+                    newId3Wrapper.getId3v2Tag().setPadding(true);
+                    mp3File.removeId3v1Tag();
+                    mp3File.removeId3v2Tag();
+                    mp3File.setId3v1Tag(newId3Wrapper.getId3v1Tag());
+                    mp3File.setId3v2Tag(newId3Wrapper.getId3v2Tag());
+                    mp3File.save(filePath+"SD"+filename);
+                    File originalFile = new File(filePath+filename);
+                    File backup =  new File(filePath+filename+".bak");
+                    File retaggedFile = new File(filePath+"SD"+filename);
+                    originalFile.renameTo(backup);
+                    retaggedFile.renameTo(originalFile);
+                    backup.delete();
+                    // When downloading music and videos they will be listed in the player
+                    // (Seems to be available since Honeycomb only)
+                    r.allowScanningByMediaScanner();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (UnsupportedTagException e) {
+                    e.printStackTrace();
+                } catch (InvalidDataException e) {
+                    e.printStackTrace();
+                } catch (NotSupportedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        registerReceiver(onComplete, new IntentFilter(dm.ACTION_DOWNLOAD_COMPLETE));
+    }
+
+    private byte[] getImage(String trackId) {
+        Bitmap bmp = tracks[Integer.parseInt(trackId)].getArtwork();
+        byte[] bytes;
+        if(bmp!= null) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            bytes = stream.toByteArray();
+        }else
+        {
+            bmp = BitmapFactory.decodeResource(getResources(),R.drawable.music);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            bytes = stream.toByteArray();
+        }
+
+        return bytes;
     }
 
     private class DownloadFile extends AsyncTask<String, Void, Void> {
@@ -207,11 +279,13 @@ public class SearchActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             String fileUrl = strings[0];
             String fileName = strings[1];
+            String pos = strings[2];
 
-            downloadManager(fileName,fileUrl);
+            downloadManager(fileName,fileUrl,pos);
             return null;
         }
 
     }
+
 
 }
