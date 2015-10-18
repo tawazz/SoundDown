@@ -10,6 +10,6 @@
 
 * clone project
 * git clone https://github.com/tawazz/SoundDown.git
-* in the root directory clone volly library
+* in the root SoundDown directory clone volly library
 * git clone https://android.googlesource.com/platform/frameworks/volley
 * rebuiled project
