@@ -1,6 +1,7 @@
 package net.tawazz.sounddown;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,11 @@ class SongsAdapter extends ArrayAdapter<Track>  {
         TextView time = (TextView) customView.findViewById(R.id.textView_time);
         TextView likes = (TextView) customView.findViewById(R.id.textView_likes);
         final ImageView artwork = (ImageView) customView.findViewById(R.id.imageView_artwork);
-        artwork.setImageBitmap(song.getArtwork());
+        if(song.getArtwork() !=null) {
+            artwork.setImageBitmap(song.getArtwork());
+        }else {
+            artwork.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.music));
+        }
         title.setText(song.getTitle());
         user.setText(song.getUser());
         time.setText(song.getTime());
