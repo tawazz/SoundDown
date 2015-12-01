@@ -225,6 +225,7 @@ public class SearchActivity extends AppCompatActivity {
                     newId3Wrapper.setTitle(filename);
                     newId3Wrapper.setAlbumImage(getImage(trackId), "image/png");
                     newId3Wrapper.setArtist(tracks[Integer.parseInt(trackId)].getUser());
+                    newId3Wrapper.setAlbum("SoundDown");
                     newId3Wrapper.getId3v2Tag().setPadding(true);
                     mp3File.removeId3v1Tag();
                     mp3File.removeId3v2Tag();
