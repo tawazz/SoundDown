@@ -65,15 +65,17 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         Intent intent = getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = URLEncoder.encode(intent.getStringExtra(SearchManager.QUERY));
-            searchSongs(query);
-        }
         view = getWindow().getDecorView().findViewById(android.R.id.content);
         songs = (ListView) view.findViewById(R.id.listView_songs);
         emptyText = (TextView) view.findViewById(R.id.textView_empty);
         songs.setEmptyView(emptyText);
-        tracks = null;
+        
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = URLEncoder.encode(intent.getStringExtra(SearchManager.QUERY));
+            searchSongs(query);
+        }else {
+            this.explore();
+        }
 
         if(tracks != null) {
             ListAdapter songsAdapter = new SongsAdapter(this, tracks);
@@ -124,6 +126,7 @@ public class SearchActivity extends AppCompatActivity {
     private void searchSongs(String query) {
 
         if(!query.isEmpty()) {
+            tracks=null;
             Json = "";
             pDialog = new ProgressDialog(SearchActivity.this);
             pDialog.setMessage("Searching ....");
@@ -145,10 +148,12 @@ public class SearchActivity extends AppCompatActivity {
                                 ListAdapter songsAdapter = new SongsAdapter(getApplicationContext(), tracks);
                                 songs.setAdapter(songsAdapter);
                                 songs.invalidateViews();
-                                pDialog.dismiss();
+                                Log.d("searching", "finished");
+
                             } else {
                                 Toast.makeText(SearchActivity.this, "No results", Toast.LENGTH_SHORT).show();
                             }
+                            pDialog.dismiss();
                         }
                     }, new Response.ErrorListener() {
                 @Override
@@ -161,6 +166,44 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
+    private void explore(){
+        Json = "";
+        tracks=null;
+        pDialog = new ProgressDialog(SearchActivity.this);
+        pDialog.setMessage("Loading....");
+        pDialog.setCancelable(false);
+        pDialog.setCanceledOnTouchOutside(false);
+        pDialog.show();
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "http://tawazz.net/fasttube/api/explore";
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Json = response;
+                        jsonToTracks();
+                        if (tracks != null) {
+                            ListAdapter songsAdapter = new SongsAdapter(getApplicationContext(), tracks);
+                            songs.setAdapter(songsAdapter);
+                            songs.invalidateViews();
+
+                        } else {
+                            Toast.makeText(SearchActivity.this, "No results", Toast.LENGTH_SHORT).show();
+                        }
+                        pDialog.dismiss();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Json = "";
+            }
+        });
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
