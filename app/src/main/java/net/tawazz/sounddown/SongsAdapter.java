@@ -23,25 +23,38 @@ class SongsAdapter extends ArrayAdapter<Track>  {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        LayoutInflater inflator = LayoutInflater.from(getContext());
-        View customView = inflator.inflate(R.layout.custom_row, parent, false);
+        Holder holder= null;
+        View customView = convertView;
+        if(customView == null){
 
-        Track song = getItem(position);
-        TextView title = (TextView) customView.findViewById(R.id.textView_title);
-        TextView user = (TextView) customView.findViewById(R.id.textView_user);
-        TextView time = (TextView) customView.findViewById(R.id.textView_time);
-        TextView likes = (TextView) customView.findViewById(R.id.textView_likes);
-        final ImageView artwork = (ImageView) customView.findViewById(R.id.imageView_artwork);
-        if(song.getArtwork() !=null) {
-            artwork.setImageBitmap(song.getArtwork());
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            customView = inflater.inflate(R.layout.custom_row, parent, false);
+
+            holder = new Holder();
+            holder.title = (TextView) customView.findViewById(R.id.textView_title);
+            holder.user = (TextView) customView.findViewById(R.id.textView_user);
+            holder.time = (TextView) customView.findViewById(R.id.textView_time);
+            holder.likes = (TextView) customView.findViewById(R.id.textView_likes);
+            holder.artwork = (ImageView) customView.findViewById(R.id.imageView_artwork);
+
+            customView.setTag(holder);
         }else {
-            artwork.setImageBitmap(BitmapFactory.decodeResource(getContext().getResources(), R.drawable.music));
+            holder = (Holder) customView.getTag();
         }
-        title.setText(song.getTitle());
-        user.setText(song.getUser());
-        time.setText(song.getTime());
-        likes.setText(song.getLike());
+        Track song = getItem(position);
+        if(song.getArtwork() !=null) {
+            holder.artwork.setImageBitmap(song.getArtwork());
+        }
+        holder.title.setText(song.getTitle());
+        holder.user.setText(song.getUser());
+        holder.time.setText(song.getTime());
+        holder.likes.setText(song.getLike());
 
         return customView;
+    }
+
+    public static class Holder {
+        public TextView title,user,time,likes;
+        public ImageView artwork;
     }
 }
