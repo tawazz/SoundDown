@@ -48,12 +48,10 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.URLEncoder;
 
 public class SearchActivity extends AppCompatActivity {
 
-    private TextView emptyText;
     private ListView songs;
     private View view;
     private String Json;
@@ -67,9 +65,9 @@ public class SearchActivity extends AppCompatActivity {
         Intent intent = getIntent();
         view = getWindow().getDecorView().findViewById(android.R.id.content);
         songs = (ListView) view.findViewById(R.id.listView_songs);
-        emptyText = (TextView) view.findViewById(R.id.textView_empty);
+        TextView emptyText = (TextView) view.findViewById(R.id.textView_empty);
         songs.setEmptyView(emptyText);
-        
+
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = URLEncoder.encode(intent.getStringExtra(SearchManager.QUERY));
             searchSongs(query);
@@ -110,11 +108,11 @@ public class SearchActivity extends AppCompatActivity {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
                 String title = jsonObject.optString("title");
-                String artworkUrl = jsonObject.optString("artwork_url").toString();
-                String streamUrl = "http://tawazz.net/fasttube/download?title=" + URLEncoder.encode(title) + "&url=" + jsonObject.optString("stream_url").toString();
-                String likes = jsonObject.optString("likes_count").toString();
-                String time = jsonObject.optString("duration").toString();
-                String user = jsonObject.getJSONObject("user").optString("username").toString();
+                String artworkUrl = jsonObject.optString("artwork_url");
+                String streamUrl = "http://tawazz.net/fasttube/download?title=" + URLEncoder.encode(title) + "&url=" + jsonObject.optString("stream_url");
+                String likes = jsonObject.optString("likes_count");
+                String time = jsonObject.optString("duration");
+                String user = jsonObject.getJSONObject("user").optString("username");
                 tracks[i] = new Track(user, title, artworkUrl, streamUrl, likes, time);
             }
         } catch (JSONException e) {
