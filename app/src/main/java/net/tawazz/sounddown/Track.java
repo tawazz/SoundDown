@@ -16,18 +16,20 @@ public class Track {
     private String title;
     private String artworkUrl;
     private String streamUrl;
+    private String previewUrl;
     private String user;
     private String like;
     private String time;
     private Bitmap artwork;
 
-    public Track(String user,String title,String artwork, String mp3, String likes, String time){
+    public Track(String user,String title,String artwork, String mp3, String likes, String time, String previewUrl){
         this.user = user;
         this.title = title;
         new GetArtwork().execute(artwork);
         streamUrl = mp3;
         this.like = likes;
         this.time = time;
+        this.previewUrl = previewUrl;
     }
 
     public String getArtworkUrl() {
@@ -42,6 +44,9 @@ public class Track {
         return streamUrl;
     }
 
+    public String getPreviewUrl() {
+        return previewUrl;
+    }
     public Bitmap getArtwork() {
 
         return artwork;

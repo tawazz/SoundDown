@@ -9,9 +9,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
@@ -22,6 +24,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,14 +53,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements SongsAdapter.AdapterListener {
 
     private ListView songs;
     private View view;
     private String Json;
     private Track[] tracks;
     ProgressDialog pDialog;
-
+    private Context context;
+    private final Handler handler = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,11 +78,13 @@ public class SearchActivity extends AppCompatActivity {
         }else {
             this.explore();
         }
-
+        context = this.getApplication();
         if(tracks != null) {
-            ListAdapter songsAdapter = new SongsAdapter(this, tracks);
+
+            SongsAdapter songsAdapter = new SongsAdapter((SearchActivity)this.getApplicationContext(), tracks);
             songs.setAdapter(songsAdapter);
         }
+        /*
         songs.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
                     @Override
@@ -91,6 +97,7 @@ public class SearchActivity extends AppCompatActivity {
                     }
                 }
         );
+        */
 
     }
 
@@ -110,10 +117,11 @@ public class SearchActivity extends AppCompatActivity {
                 String title = jsonObject.optString("title");
                 String artworkUrl = jsonObject.optString("artwork_url");
                 String streamUrl = "http://tawazz.net/fasttube/download?title=" + URLEncoder.encode(title) + "&url=" + jsonObject.optString("stream_url");
+                String previewUrl = jsonObject.optString("stream_url")+"?client_id=0120297111908d39612578eb181ed3c7";
                 String likes = jsonObject.optString("likes_count");
                 String time = jsonObject.optString("duration");
                 String user = jsonObject.getJSONObject("user").optString("username");
-                tracks[i] = new Track(user, title, artworkUrl, streamUrl, likes, time);
+                tracks[i] = new Track(user, title, artworkUrl, streamUrl, likes, time,previewUrl);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -143,7 +151,7 @@ public class SearchActivity extends AppCompatActivity {
                             Json = response;
                             jsonToTracks();
                             if (tracks != null) {
-                                ListAdapter songsAdapter = new SongsAdapter(getApplicationContext(), tracks);
+                                SongsAdapter songsAdapter = new SongsAdapter(SearchActivity.this, tracks);
                                 songs.setAdapter(songsAdapter);
                                 songs.invalidateViews();
                                 Log.d("searching", "finished");
@@ -184,7 +192,8 @@ public class SearchActivity extends AppCompatActivity {
                         Json = response;
                         jsonToTracks();
                         if (tracks != null) {
-                            ListAdapter songsAdapter = new SongsAdapter(getApplicationContext(), tracks);
+                            SongsAdapter songsAdapter = new SongsAdapter(context, tracks);
+                            songsAdapter.callback(SearchActivity.this);
                             songs.setAdapter(songsAdapter);
                             songs.invalidateViews();
 
@@ -231,16 +240,16 @@ public class SearchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
     public void getSong(Track song,int pos){
         String filename = song.getTitle()+".mp3";
         String fileUrl = song.getStreamUrl();
         String trackId = pos+"";
 
         Toast.makeText(SearchActivity.this,"Downloading...",Toast.LENGTH_SHORT).show();
-        new DownloadFile().execute(fileUrl, filename,trackId);
+        new DownloadFile().execute(fileUrl, filename, trackId);
 
     }
-
     public void downloadManager(final String filename, String fileUrl, String pos){
 
         Uri fileUri = Uri.parse(fileUrl);
@@ -329,5 +338,17 @@ public class SearchActivity extends AppCompatActivity {
 
     }
 
-
+    @Override
+    public void primarySeekBarProgressUpdater(SeekBar seekBarProgress, final MediaPlayer mediaPlayer, final int mediaFileLengthInMilliseconds ) {
+        seekBarProgress.setProgress((int) (((float) mediaPlayer.getCurrentPosition() / mediaFileLengthInMilliseconds) * 100)); // This math construction give a percentage of "was playing"/"song length"
+        final SeekBar seekBar = seekBarProgress;
+        if (mediaPlayer.isPlaying()) {
+            Runnable notification = new Runnable() {
+                public void run() {
+                    primarySeekBarProgressUpdater(seekBar,mediaPlayer,mediaFileLengthInMilliseconds);
+                }
+            };
+            handler.postDelayed(notification,1000);
+        }
+    }
 }

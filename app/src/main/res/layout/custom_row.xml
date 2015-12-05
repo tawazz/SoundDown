@@ -6,7 +6,7 @@
 
     <ImageView
         android:layout_width="75dp"
-        android:layout_height="125dp"
+        android:layout_height="145dp"
         android:id="@+id/imageView_artwork"
         android:src="@drawable/music_icon"
         android:layout_margin="5dp" />
@@ -47,8 +47,11 @@
             android:id="@+id/textView_likes"
             android:layout_below="@+id/textView_title"
             android:layout_alignParentStart="true"
-            android:layout_margin="5dp"
-            android:textColor="#7f8c8d" />
+            android:textColor="#7f8c8d"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_toStartOf="@+id/preview" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -60,6 +63,44 @@
             android:layout_alignParentEnd="true"
             android:layout_margin="5dp"
             android:textColor="#7f8c8d" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/preview"
+            android:id="@+id/preview"
+            android:textAlignment="center"
+            android:textColor="#f5f5f5"
+            android:layout_alignTop="@+id/textView_likes"
+            android:layout_toStartOf="@+id/download"
+            android:background="@drawable/tazzy_buttons"
+            android:minWidth="100dp"
+            android:nestedScrollingEnabled="false"
+            android:layout_marginRight="5dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/download"
+            android:id="@+id/download"
+            style="@style/Buttontazzy"
+            android:textColor="#f5f5f5"
+            android:layout_alignTop="@+id/preview"
+            android:layout_alignEnd="@+id/textView_title"
+            android:background="@drawable/tazzy_buttons"
+            android:minWidth="100dp" />
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar"
+            android:layout_below="@+id/preview"
+            android:layout_alignEnd="@+id/download"
+            android:max="99"
+            android:minHeight="20dp"
+            android:progress="@android:integer/config_mediumAnimTime" />
+
     </RelativeLayout>
 
 </LinearLayout>
