@@ -15,6 +15,11 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.NetworkImageView;
+
+import net.tawazz.sounddown.helpers.FontAwesome;
+import net.tawazz.sounddown.helpers.WebRequest;
+
 
 /**
  * Created by tawanda on 2/10/15.
@@ -52,11 +57,10 @@ class SongsAdapter extends ArrayAdapter<Track>  {
             holder.title = (TextView) customView.findViewById(R.id.textView_title);
             holder.user = (TextView) customView.findViewById(R.id.textView_user);
             holder.time = (TextView) customView.findViewById(R.id.textView_time);
-            holder.likes = (TextView) customView.findViewById(R.id.textView_likes);
+            holder.likes = (FontAwesome) customView.findViewById(R.id.textView_likes);
             holder.artwork = (ImageView) customView.findViewById(R.id.imageView_artwork);
-            holder.preview =(Button) customView.findViewById(R.id.preview);
-            holder.download =(Button) customView.findViewById(R.id.download);
-            holder.progressBar = (ProgressBar) customView.findViewById(R.id.progressBar);
+            holder.download = (FontAwesome) customView.findViewById(R.id.download);
+            holder.preview = (FontAwesome) customView.findViewById(R.id.textView_play);
             customView.setTag(holder);
         }else {
             holder = (Holder) customView.getTag();
@@ -65,14 +69,14 @@ class SongsAdapter extends ArrayAdapter<Track>  {
         if(song.getArtwork() !=null) {
             holder.artwork.setImageBitmap(song.getArtwork());
         }
+        String likesText = getContext().getString(R.string.heart)+" "+ song.getLike();
         holder.title.setText(song.getTitle());
         holder.user.setText(song.getUser());
         holder.time.setText(song.getTime());
-        holder.likes.setText(song.getLike());
-        holder.progressBar.setVisibility(View.GONE);
+        holder.likes.setText(likesText);
 
-        final Button preview = holder.preview;
-        final ProgressBar prog = holder.progressBar;
+
+        final FontAwesome preview = holder.preview;
         holder.preview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,7 +87,7 @@ class SongsAdapter extends ArrayAdapter<Track>  {
                     }else {
                         mediaPlayer.stop();
                         mediaPlayer.reset();
-                        preview.setText("Preview");
+                        preview.setText(getContext().getString(R.string.play));
                     }
                 }else{
                     mediaPlayer = new MediaPlayer();
@@ -93,7 +97,7 @@ class SongsAdapter extends ArrayAdapter<Track>  {
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        preview.setText("Preview");
+                        preview.setText(getContext().getString(R.string.play));
                     }
                 });
 
@@ -101,7 +105,7 @@ class SongsAdapter extends ArrayAdapter<Track>  {
                     @Override
                     public void onPrepared(MediaPlayer mp) {
                         mediaPlayer.start();
-                        preview.setText("Stop");
+                        preview.setText(getContext().getString(R.string.stop));
                     }
                 });
             }
@@ -118,7 +122,6 @@ class SongsAdapter extends ArrayAdapter<Track>  {
                     }
                 }
         });
-
         return customView;
     }
 
@@ -126,12 +129,12 @@ class SongsAdapter extends ArrayAdapter<Track>  {
         this.listener = listener;
     }
 
-    public MediaPlayer preview(String streamUrl, Button preview){
+    public MediaPlayer preview(String streamUrl, FontAwesome preview){
 
         try {
             mediaPlayer.setDataSource(streamUrl); // URL to mediaplayer data source
             mediaPlayer.prepareAsync(); // you must call this method after setup the datasource in setDataSource method. After calling prepare() the instance of MediaPlayer starts load data from URL to internal buffer.
-            preview.setText("Buffering...");
+            preview.setText(getContext().getString(R.string.play));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -140,7 +143,6 @@ class SongsAdapter extends ArrayAdapter<Track>  {
     public static class Holder {
         public TextView title,user,time,likes;
         public ImageView artwork;
-        public Button preview,download;
-        public ProgressBar progressBar;
+        public FontAwesome preview,download;
     }
 }
