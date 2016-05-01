@@ -5,4 +5,10 @@
     <string name="search">Search</string>
     <string name="empty_list">Search to Download Songs</string>
     <string name="title_activity_resolve">Resolve</string>
+    <string name="preview">Preview</string>
+    <string name="download">Download</string>
+    <string name="heart">&#xf004;</string>
+    <string name="pause">&#xf04c;</string>
+    <string name="stop">&#xf04c;</string>
+    <string name="play">&#xf04b;</string>
 </resources>

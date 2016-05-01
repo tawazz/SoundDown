@@ -4,6 +4,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.ImageRequest;
+
+import net.tawazz.sounddown.helpers.WebRequest;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -16,18 +22,34 @@ public class Track {
     private String title;
     private String artworkUrl;
     private String streamUrl;
+    private String previewUrl;
     private String user;
     private String like;
     private String time;
     private Bitmap artwork;
+    private WebRequest request;
 
-    public Track(String user,String title,String artwork, String mp3, String likes, String time){
+    public Track(String user, String title, final String artwork, String mp3, String likes, String time, String previewUrl) {
         this.user = user;
         this.title = title;
+        /** method deprecated
         new GetArtwork().execute(artwork);
+        **/
         streamUrl = mp3;
         this.like = likes;
         this.time = time;
+        this.previewUrl = previewUrl;
+
+        request = WebRequest.getInstance();
+        RequestQueue queue = request.getRequestQueue();
+        ImageRequest imageRequest = new ImageRequest(artwork, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+                Track.this.artwork = response;
+            }
+        },0,0,null,null,null);
+
+        queue.add(imageRequest);
     }
 
     public String getArtworkUrl() {
@@ -42,19 +64,24 @@ public class Track {
         return streamUrl;
     }
 
+    public String getPreviewUrl() {
+        return previewUrl;
+    }
+
     public Bitmap getArtwork() {
 
         return artwork;
     }
+
     public String getTime() {
         int time = Integer.parseInt(this.time);
-        int mins = (time/60000)%60;
-        int secs = (time%60000)/1000;
+        int mins = (time / 60000) % 60;
+        int secs = (time % 60000) / 1000;
 
-        if(secs < 10){
-            return mins+":0"+secs;
-        }else{
-            return mins+":"+secs;
+        if (secs < 10) {
+            return mins + ":0" + secs;
+        } else {
+            return mins + ":" + secs;
         }
     }
 
@@ -89,12 +116,14 @@ public class Track {
     public void setStreamUrl(String streamUrl) {
         this.streamUrl = streamUrl;
     }
+
     private class GetArtwork extends AsyncTask<String, String, Bitmap> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
 
         }
+
         protected Bitmap doInBackground(String... args) {
             try {
                 artwork = BitmapFactory.decodeStream((InputStream) new URL(args[0]).getContent());

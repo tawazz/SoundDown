@@ -9,9 +9,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
@@ -22,6 +24,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +36,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 
+import net.tawazz.sounddown.helpers.WebRequest;
 import net.tawazz.sounddown.mp3agic.ID3Wrapper;
 import net.tawazz.sounddown.mp3agic.ID3v1Tag;
 import net.tawazz.sounddown.mp3agic.ID3v23Tag;
@@ -50,14 +54,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements SongsAdapter.AdapterListener {
 
     private ListView songs;
     private View view;
     private String Json;
     private Track[] tracks;
     ProgressDialog pDialog;
-
+    private Context context;
+    private final Handler handler = new Handler();
+    private WebRequest request;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +73,8 @@ public class SearchActivity extends AppCompatActivity {
         songs = (ListView) view.findViewById(R.id.listView_songs);
         TextView emptyText = (TextView) view.findViewById(R.id.textView_empty);
         songs.setEmptyView(emptyText);
+        context = this.getApplication();
+        request = WebRequest.getInstance();
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = URLEncoder.encode(intent.getStringExtra(SearchManager.QUERY));
@@ -76,9 +84,11 @@ public class SearchActivity extends AppCompatActivity {
         }
 
         if(tracks != null) {
-            ListAdapter songsAdapter = new SongsAdapter(this, tracks);
+
+            SongsAdapter songsAdapter = new SongsAdapter((SearchActivity)this.getApplicationContext(), tracks);
             songs.setAdapter(songsAdapter);
         }
+        /*
         songs.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
                     @Override
@@ -91,6 +101,14 @@ public class SearchActivity extends AppCompatActivity {
                     }
                 }
         );
+        */
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                songs.invalidateViews();
+            }
+        },3500);
 
     }
 
@@ -110,10 +128,11 @@ public class SearchActivity extends AppCompatActivity {
                 String title = jsonObject.optString("title");
                 String artworkUrl = jsonObject.optString("artwork_url");
                 String streamUrl = "http://tawazz.net/fasttube/download?title=" + URLEncoder.encode(title) + "&url=" + jsonObject.optString("stream_url");
+                String previewUrl = jsonObject.optString("stream_url")+"?client_id=0120297111908d39612578eb181ed3c7";
                 String likes = jsonObject.optString("likes_count");
                 String time = jsonObject.optString("duration");
                 String user = jsonObject.getJSONObject("user").optString("username");
-                tracks[i] = new Track(user, title, artworkUrl, streamUrl, likes, time);
+                tracks[i] = new Track(user, title, artworkUrl, streamUrl, likes, time,previewUrl);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -131,36 +150,10 @@ public class SearchActivity extends AppCompatActivity {
             pDialog.setCancelable(false);
             pDialog.setCanceledOnTouchOutside(false);
             pDialog.show();
-            // Instantiate the RequestQueue.
-            RequestQueue queue = Volley.newRequestQueue(this);
             String url = "http://tawazz.net/fasttube/api/search/" + query;
 
             // Request a string response from the provided URL.
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            Json = response;
-                            jsonToTracks();
-                            if (tracks != null) {
-                                ListAdapter songsAdapter = new SongsAdapter(getApplicationContext(), tracks);
-                                songs.setAdapter(songsAdapter);
-                                songs.invalidateViews();
-                                Log.d("searching", "finished");
-
-                            } else {
-                                Toast.makeText(SearchActivity.this, "No results", Toast.LENGTH_SHORT).show();
-                            }
-                            pDialog.dismiss();
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Json = "";
-                }
-            });
-            // Add the request to the RequestQueue.
-            queue.add(stringRequest);
+            request(url);
         }
     }
 
@@ -172,35 +165,12 @@ public class SearchActivity extends AppCompatActivity {
         pDialog.setCancelable(false);
         pDialog.setCanceledOnTouchOutside(false);
         pDialog.show();
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
+
         String url = "http://tawazz.net/fasttube/api/explore";
 
         // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Json = response;
-                        jsonToTracks();
-                        if (tracks != null) {
-                            ListAdapter songsAdapter = new SongsAdapter(getApplicationContext(), tracks);
-                            songs.setAdapter(songsAdapter);
-                            songs.invalidateViews();
+        request(url);
 
-                        } else {
-                            Toast.makeText(SearchActivity.this, "No results", Toast.LENGTH_SHORT).show();
-                        }
-                        pDialog.dismiss();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Json = "";
-            }
-        });
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -231,16 +201,16 @@ public class SearchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
     public void getSong(Track song,int pos){
         String filename = song.getTitle()+".mp3";
         String fileUrl = song.getStreamUrl();
         String trackId = pos+"";
 
-        Toast.makeText(SearchActivity.this,"Downloading...",Toast.LENGTH_SHORT).show();
-        new DownloadFile().execute(fileUrl, filename,trackId);
+        Toast.makeText(SearchActivity.this,"Downloading "+filename+"...",Toast.LENGTH_SHORT).show();
+        new DownloadFile().execute(fileUrl, filename, trackId);
 
     }
-
     public void downloadManager(final String filename, String fileUrl, String pos){
 
         Uri fileUri = Uri.parse(fileUrl);
@@ -329,5 +299,48 @@ public class SearchActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void primarySeekBarProgressUpdater(SeekBar seekBarProgress, final MediaPlayer mediaPlayer, final int mediaFileLengthInMilliseconds ) {
+        seekBarProgress.setProgress((int) (((float) mediaPlayer.getCurrentPosition() / mediaFileLengthInMilliseconds) * 100)); // This math construction give a percentage of "was playing"/"song length"
+        final SeekBar seekBar = seekBarProgress;
+        if (mediaPlayer.isPlaying()) {
+            Runnable notification = new Runnable() {
+                public void run() {
+                    primarySeekBarProgressUpdater(seekBar,mediaPlayer,mediaFileLengthInMilliseconds);
+                }
+            };
+            handler.postDelayed(notification,1000);
+        }
+    }
+
+    public void request(String url){
+        // Instantiate the RequestQueue.
+        RequestQueue queue = request.getRequestQueue();
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Json = response;
+                        jsonToTracks();
+                        if (tracks != null) {
+                            SongsAdapter songsAdapter = new SongsAdapter(context, tracks);
+                            songsAdapter.callback(SearchActivity.this);
+                            songs.setAdapter(songsAdapter);
+                            songs.invalidateViews();
+
+                        } else {
+                            Toast.makeText(SearchActivity.this, "No results", Toast.LENGTH_SHORT).show();
+                        }
+                        pDialog.dismiss();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Json = "";
+            }
+        });
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
 
 }
