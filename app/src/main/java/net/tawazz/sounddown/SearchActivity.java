@@ -127,8 +127,8 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
 
                 String title = jsonObject.optString("title");
                 String artworkUrl = jsonObject.optString("artwork_url");
-                String streamUrl = "http://tawazz.net/fasttube/download?title=" + URLEncoder.encode(title) + "&url=" + jsonObject.optString("stream_url");
-                String previewUrl = jsonObject.optString("stream_url")+"?client_id=0120297111908d39612578eb181ed3c7";
+                String streamUrl = "http://tawazz.net/fasttube/download?title=" + URLEncoder.encode(title) + "&url=" + jsonObject.optString("uri");
+                String previewUrl = "http://tawazz.net/fasttube/download?title=" + URLEncoder.encode(title) + "&url=" + jsonObject.optString("uri");
                 String likes = jsonObject.optString("likes_count");
                 String time = jsonObject.optString("duration");
                 String user = jsonObject.getJSONObject("user").optString("username");

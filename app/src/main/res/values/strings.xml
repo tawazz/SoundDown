@@ -7,8 +7,9 @@
     <string name="title_activity_resolve">Resolve</string>
     <string name="preview">Preview</string>
     <string name="download">Download</string>
-    <string name="heart">&#xf004;</string>
-    <string name="pause">&#xf04c;</string>
-    <string name="stop">&#xf04c;</string>
-    <string name="play">&#xf04b;</string>
+    <string name="heart">{fa-heart}</string>
+    <string name="pause">{fa-pause}</string>
+    <string name="stop">{fa-stop}</string>
+    <string name="play">{fa-play}</string>
+    <string name="buffering">{fa-spinner spin}</string>
 </resources>

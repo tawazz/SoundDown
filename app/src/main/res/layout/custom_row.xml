@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal">
 
     <android.support.v7.widget.CardView
@@ -16,14 +16,14 @@
             android:layout_margin="10dp">
 
             <TextView
+                android:id="@+id/textView_user"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="user"
-                android:id="@+id/textView_user"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
                 android:layout_margin="15dp"
+                android:text="user"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="#7f8c8d" />
 
             <RelativeLayout
@@ -43,78 +43,90 @@
                     android:id="@+id/textView_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#ffffff"
-                    android:background="#99000000"
-                    android:layout_alignRight="@+id/imageView_artwork"
                     android:layout_alignBottom="@+id/imageView_artwork"
-                    android:text="Jason Derulo - aint no type"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignRight="@+id/imageView_artwork"
+                    android:background="#99000000"
                     android:gravity="center_vertical"
                     android:padding="20dp"
-                    android:textSize="25sp"
-                    android:layout_alignParentStart="true" />
+                    android:text="Jason Derulo - aint no type"
+                    android:textColor="#ffffff"
+                    android:textSize="25sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/imageView_artwork"
+                    android:layout_marginTop="10dp"
                     android:weightSum="2"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginBottom="10dp">
 
-                    <net.tawazz.sounddown.helpers.FontAwesome
+                    <com.joanzapata.iconify.widget.IconTextView
+                        android:id="@+id/textView_play"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="&#xf04b;"
-                        android:id="@+id/textView_play"
-                        android:layout_below="@+id/imageView_artwork"
                         android:layout_alignParentStart="true"
-                        android:textColor="#7f8c8d"
+                        android:layout_below="@+id/imageView_artwork"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="5dp"
                         android:layout_marginTop="5dp"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1"
+                        android:shadowColor="#22000000"
+                        android:shadowDx="3"
+                        android:shadowDy="3"
+                        android:shadowRadius="1"
+                        android:text="{fa-play}"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="#7f8c8d" />
+
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:weightSum="3">
 
-                        <TextView
+                        <com.joanzapata.iconify.widget.IconTextView
+                            android:id="@+id/textView_time"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="4:05"
-                            android:id="@+id/textView_time"
                             android:layout_alignParentStart="true"
-                            android:textColor="#7f8c8d"
                             android:layout_marginLeft="5dp"
                             android:layout_marginRight="5dp"
                             android:layout_marginTop="5dp"
-                            android:layout_weight="1"/>
-                        <net.tawazz.sounddown.helpers.FontAwesome
+                            android:layout_weight="1"
+                            android:text="4:05"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textColor="#7f8c8d" />
+
+                        <com.joanzapata.iconify.widget.IconTextView
                             android:id="@+id/textView_likes"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="likes"
                             android:layout_alignParentStart="true"
-                            android:textColor="#7f8c8d"
                             android:layout_marginLeft="5dp"
                             android:layout_marginRight="5dp"
                             android:layout_marginTop="5dp"
-                            android:layout_weight="1"/>
-                        <net.tawazz.sounddown.helpers.FontAwesome
+                            android:layout_weight="1"
+                            android:text="{fa-heart}"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textColor="#7f8c8d" />
+
+                        <com.joanzapata.iconify.widget.IconTextView
+                            android:id="@+id/download"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:text="&#xf063;"
-                            android:id="@+id/download"
                             android:layout_alignParentStart="true"
-                            android:textColor="#7f8c8d"
                             android:layout_marginLeft="5dp"
                             android:layout_marginRight="5dp"
                             android:layout_marginTop="5dp"
-                            android:layout_weight="1"/>
+                            android:layout_weight="1"
+                            android:shadowColor="#22000000"
+                            android:shadowDx="3"
+                            android:shadowDy="3"
+                            android:shadowRadius="1"
+                            android:text="{fa-arrow-down}"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textColor="#7f8c8d" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -122,7 +134,6 @@
             </RelativeLayout>
 
         </RelativeLayout>
-
 
 
     </android.support.v7.widget.CardView>
