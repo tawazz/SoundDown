@@ -3,6 +3,7 @@ package net.tawazz.sounddown;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.widget.ImageView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -29,17 +30,18 @@ public class Track {
     private Bitmap artwork;
     private WebRequest request;
 
-    public Track(String user, String title, final String artwork, String mp3, String likes, String time, String previewUrl) {
+    public Track(String user, String title, String artwork, String mp3, String likes, String time, String previewUrl) {
         this.user = user;
         this.title = title;
+        artwork = artwork.replace("-large","-crop");
         /** method deprecated
         new GetArtwork().execute(artwork);
         **/
+
         streamUrl = mp3;
         this.like = likes;
         this.time = time;
         this.previewUrl = previewUrl;
-
         request = WebRequest.getInstance();
         RequestQueue queue = request.getRequestQueue();
         ImageRequest imageRequest = new ImageRequest(artwork, new Response.Listener<Bitmap>() {
