@@ -60,6 +60,9 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
     private Context context;
     private final Handler handler = new Handler();
     private WebRequest request;
+    private ActivityListener activityListener;
+    private SongsAdapter songsAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,8 +97,9 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
         View.generateViewId();
         if(tracks != null) {
 
-            SongsAdapter songsAdapter = new SongsAdapter((SearchActivity)this, tracks);
+            songsAdapter = new SongsAdapter((SearchActivity)this.getApplicationContext(), tracks);
             songs.setAdapter(songsAdapter);
+            activityListener=songsAdapter;
         }
         /*
         songs.setOnItemClickListener(
@@ -333,8 +337,9 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
                         Json = response;
                         jsonToTracks();
                         if (tracks != null) {
-                            SongsAdapter songsAdapter = new SongsAdapter(context, tracks);
+                            songsAdapter = new SongsAdapter(context, tracks);
                             songsAdapter.callback(SearchActivity.this);
+                            activityListener = songsAdapter;
                             songs.setAdapter(songsAdapter);
                             songs.invalidateViews();
 
@@ -353,22 +358,11 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
         queue.add(stringRequest);
     }
 
-    /**
-     * Generate a value suitable for use in .
-     * This value will not collide with ID values generated at build time by aapt for R.id.
-     *
-     * @return a generated ID value
-     */
-    public static int generateViewId() {
-        AtomicInteger  sNextGeneratedId = new AtomicInteger(1);
-        for (;;) {
-            final int result = sNextGeneratedId.get();
-            // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
-            int newValue = result + 1;
-            if (newValue > 0x00FFFFFF) newValue = 1; // Roll over to 1, not 0.
-            if (sNextGeneratedId.compareAndSet(result, newValue)) {
-                return result;
-            }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(activityListener != null) {
+            activityListener.destroy();
         }
     }
 

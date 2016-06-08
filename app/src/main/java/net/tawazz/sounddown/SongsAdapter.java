@@ -1,13 +1,16 @@
 package net.tawazz.sounddown;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -19,38 +22,48 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.joanzapata.iconify.widget.IconButton;
 import com.joanzapata.iconify.widget.IconTextView;
 
+import net.tawazz.sounddown.helpers.ApplicationData;
 import net.tawazz.sounddown.helpers.FontAwesome;
+import net.tawazz.sounddown.helpers.ScalingUtilities;
 import net.tawazz.sounddown.helpers.WebRequest;
 
 
 /**
  * Created by tawanda on 2/10/15.
  */
-class SongsAdapter extends ArrayAdapter<Track>  {
+class SongsAdapter extends ArrayAdapter<Track> implements ActivityListener {
 
     private Context activity;
     private AdapterListener listener;
-    private  MediaPlayer mediaPlayer;
+    private MediaPlayer mediaPlayer;
 
-    public interface AdapterListener{
+    @Override
+    public void destroy() {
+        mediaPlayer.stop();
+        mediaPlayer.reset();
+    }
 
-        public  void getSong(Track song,int pos);
-        public void primarySeekBarProgressUpdater(SeekBar seekBarProgress, final MediaPlayer mediaPlayer, final int mediaFileLengthInMilliseconds );
+    public interface AdapterListener {
+
+        public void getSong(Track song, int pos);
+
+        public void primarySeekBarProgressUpdater(SeekBar seekBarProgress, final MediaPlayer mediaPlayer, final int mediaFileLengthInMilliseconds);
     }
 
     public SongsAdapter(Context context, Track[] songs) {
-        super(context,R.layout.custom_row, songs);
+        super(context, R.layout.custom_row, songs);
         activity = context;
-        mediaPlayer = new MediaPlayer();
+        ApplicationData app = (ApplicationData) activity.getApplicationContext() ;
+        mediaPlayer = app.mediaPlayer;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        Holder holder= null;
+        Holder holder = null;
         View customView = convertView;
         final int pos = position;
-        if(customView == null){
+        if (customView == null) {
 
             LayoutInflater inflater = LayoutInflater.from(getContext());
             customView = inflater.inflate(R.layout.custom_row, parent, false);
@@ -64,14 +77,15 @@ class SongsAdapter extends ArrayAdapter<Track>  {
             holder.download = (IconTextView) customView.findViewById(R.id.download);
             holder.preview = (IconTextView) customView.findViewById(R.id.textView_play);
             customView.setTag(holder);
-        }else {
+        } else {
             holder = (Holder) customView.getTag();
         }
         final Track song = getItem(position);
-        if(song.getArtwork() !=null) {
+        if (song.getArtwork() != null) {
+
             holder.artwork.setImageBitmap(song.getArtwork());
         }
-        String likesText = getContext().getString(R.string.heart)+" "+ song.getLike();
+        String likesText = getContext().getString(R.string.heart) + " " + song.getLike();
         holder.title.setText(song.getTitle());
         holder.user.setText(song.getUser());
         holder.time.setText(song.getTime());
@@ -83,15 +97,15 @@ class SongsAdapter extends ArrayAdapter<Track>  {
             @Override
             public void onClick(View v) {
 
-                if(mediaPlayer != null){
-                    if(!mediaPlayer.isPlaying()){
+                if (mediaPlayer != null) {
+                    if (!mediaPlayer.isPlaying()) {
                         preview(song.getPreviewUrl(), preview);
-                    }else {
+                    } else {
                         mediaPlayer.stop();
                         mediaPlayer.reset();
                         preview.setText(getContext().getString(R.string.play));
                     }
-                }else{
+                } else {
                     mediaPlayer = new MediaPlayer();
                 }
 
@@ -100,6 +114,7 @@ class SongsAdapter extends ArrayAdapter<Track>  {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
                         preview.setText(getContext().getString(R.string.play));
+                        mediaPlayer.reset();
                     }
                 });
 
@@ -116,22 +131,22 @@ class SongsAdapter extends ArrayAdapter<Track>  {
         holder.download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    Log.d("click","clicked");
-                    try {
-                        listener.getSong(song,pos);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                Log.d("click", "clicked");
+                try {
+                    listener.getSong(song, pos);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+            }
         });
         return customView;
     }
 
-    public void callback (AdapterListener listener){
+    public void callback(AdapterListener listener) {
         this.listener = listener;
     }
 
-    public MediaPlayer preview(String streamUrl,IconTextView preview){
+    public MediaPlayer preview(String streamUrl, IconTextView preview) {
 
         try {
             mediaPlayer.setDataSource(streamUrl); // URL to mediaplayer data source
@@ -142,9 +157,12 @@ class SongsAdapter extends ArrayAdapter<Track>  {
         }
         return mediaPlayer;
     }
+
     public static class Holder {
-        public TextView title,user;
+        public TextView title, user;
         public ImageView artwork;
-        public IconTextView preview,download,time,likes;
+        public IconTextView preview, download, time, likes;
     }
+
+
 }
