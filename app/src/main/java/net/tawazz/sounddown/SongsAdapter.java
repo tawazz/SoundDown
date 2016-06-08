@@ -74,7 +74,7 @@ class SongsAdapter extends ArrayAdapter<Track> {
         }
         final Track song = getItem(position);
         if (song.getArtwork() != null) {
-            
+
             final Holder h = holder;
             Runnable scalling = new Runnable() {
                 @Override
