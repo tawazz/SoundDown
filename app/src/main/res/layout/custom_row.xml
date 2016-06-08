@@ -53,7 +53,8 @@
                     android:text="Jason Derulo - aint no type"
                     android:textColor="#ffffff"
                     android:layout_marginBottom="16dp"
-                    android:layout_marginLeft="16dp" />
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"

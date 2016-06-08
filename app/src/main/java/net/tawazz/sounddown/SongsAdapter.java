@@ -30,11 +30,17 @@ import net.tawazz.sounddown.helpers.WebRequest;
 /**
  * Created by tawanda on 2/10/15.
  */
-class SongsAdapter extends ArrayAdapter<Track> {
+class SongsAdapter extends ArrayAdapter<Track> implements ActivityListener {
 
     private Context activity;
     private AdapterListener listener;
     private MediaPlayer mediaPlayer;
+
+    @Override
+    public void destroy() {
+        mediaPlayer.stop();
+        mediaPlayer.reset();
+    }
 
     public interface AdapterListener {
 
@@ -75,20 +81,7 @@ class SongsAdapter extends ArrayAdapter<Track> {
         final Track song = getItem(position);
         if (song.getArtwork() != null) {
 
-            final Holder h = holder;
-            Runnable scalling = new Runnable() {
-                @Override
-                public void run() {
-                    int width = h.artwork.getWidth();
-                    int height = h.artwork.getHeight();
-                    Bitmap image = ScalingUtilities.createScaledBitmap(song.getArtwork(), width, height, ScalingUtilities.ScalingLogic.FIT);
-                    h.artwork.setImageBitmap(image);
-                }
-            };
-            Handler handler = new Handler();
-            handler.post(scalling);
-
-
+            holder.artwork.setImageBitmap(song.getArtwork());
         }
         String likesText = getContext().getString(R.string.heart) + " " + song.getLike();
         holder.title.setText(song.getTitle());
@@ -119,6 +112,7 @@ class SongsAdapter extends ArrayAdapter<Track> {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
                         preview.setText(getContext().getString(R.string.play));
+                        mediaPlayer.reset();
                     }
                 });
 
@@ -167,4 +161,6 @@ class SongsAdapter extends ArrayAdapter<Track> {
         public ImageView artwork;
         public IconTextView preview, download, time, likes;
     }
+
+
 }

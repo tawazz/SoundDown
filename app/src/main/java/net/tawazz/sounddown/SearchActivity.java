@@ -64,6 +64,9 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
     private Context context;
     private final Handler handler = new Handler();
     private WebRequest request;
+    private ActivityListener activityListener;
+    private SongsAdapter songsAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,8 +88,9 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
 
         if(tracks != null) {
 
-            SongsAdapter songsAdapter = new SongsAdapter((SearchActivity)this.getApplicationContext(), tracks);
+            songsAdapter = new SongsAdapter((SearchActivity)this.getApplicationContext(), tracks);
             songs.setAdapter(songsAdapter);
+            activityListener=songsAdapter;
         }
         /*
         songs.setOnItemClickListener(
@@ -323,8 +327,9 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
                         Json = response;
                         jsonToTracks();
                         if (tracks != null) {
-                            SongsAdapter songsAdapter = new SongsAdapter(context, tracks);
+                            songsAdapter = new SongsAdapter(context, tracks);
                             songsAdapter.callback(SearchActivity.this);
+                            activityListener = songsAdapter;
                             songs.setAdapter(songsAdapter);
                             songs.invalidateViews();
 
@@ -343,4 +348,19 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
         queue.add(stringRequest);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(activityListener != null) {
+            activityListener.destroy();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(activityListener != null) {
+            activityListener.destroy();
+        }
+    }
 }

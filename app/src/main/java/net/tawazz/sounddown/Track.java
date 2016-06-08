@@ -49,7 +49,7 @@ public class Track {
             public void onResponse(Bitmap response) {
                 Track.this.artwork = response;
             }
-        },0,0,null,null,null);
+        },400,400, ImageView.ScaleType.CENTER_CROP,null,null);
 
         queue.add(imageRequest);
     }
