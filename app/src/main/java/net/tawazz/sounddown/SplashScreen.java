@@ -13,6 +13,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
 import net.tawazz.sounddown.helpers.ApplicationData;
+import net.tawazz.sounddown.helpers.WebRequest;
 
 public class SplashScreen extends AppCompatActivity {
 
@@ -50,6 +51,7 @@ public class SplashScreen extends AppCompatActivity {
             }
         });
         // Add the request to the RequestQueue.
+        stringRequest.setRetryPolicy(WebRequest.getInstance().retryPolicy());
         queue.add(stringRequest);
 
     }

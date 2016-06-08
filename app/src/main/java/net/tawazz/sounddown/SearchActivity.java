@@ -48,7 +48,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SearchActivity extends AppCompatActivity implements SongsAdapter.AdapterListener {
 
@@ -94,12 +93,11 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
             this.explore();
         }
 
-        View.generateViewId();
         if(tracks != null) {
 
-            songsAdapter = new SongsAdapter((SearchActivity)this.getApplicationContext(), tracks);
+            songsAdapter = new SongsAdapter(this, tracks);
             songs.setAdapter(songsAdapter);
-            activityListener=songsAdapter;
+            activityListener = songsAdapter;
         }
         /*
         songs.setOnItemClickListener(
@@ -355,6 +353,7 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
             }
         });
         // Add the request to the RequestQueue.
+        stringRequest.setRetryPolicy(request.retryPolicy());
         queue.add(stringRequest);
     }
 

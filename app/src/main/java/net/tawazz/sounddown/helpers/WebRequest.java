@@ -3,6 +3,7 @@ package net.tawazz.sounddown.helpers;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
@@ -48,5 +49,10 @@ public class WebRequest {
         }
 
         return instance;
+    }
+
+    public DefaultRetryPolicy retryPolicy() {
+
+        return new DefaultRetryPolicy(60000, 3, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
     }
 }
