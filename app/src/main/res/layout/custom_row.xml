@@ -45,6 +45,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/imageView_artwork"
                     android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
                     android:layout_alignRight="@+id/imageView_artwork"
                     android:background="#99000000"
                     android:gravity="center_vertical"
@@ -67,9 +68,6 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_below="@+id/imageView_artwork"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
-                        android:layout_marginTop="5dp"
                         android:layout_weight="1"
                         android:shadowColor="#22000000"
                         android:shadowDx="3"
@@ -77,7 +75,8 @@
                         android:shadowRadius="1"
                         android:text="{fa-play}"
                         android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textColor="#7f8c8d" />
+                        android:textColor="#7f8c8d"
+                        android:padding="20dp" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -90,35 +89,27 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
-                            android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginTop="5dp"
                             android:layout_weight="1"
                             android:text="4:05"
                             android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:textColor="#7f8c8d" />
+                            android:textColor="#7f8c8d"
+                            android:padding="20dp" />
 
                         <com.joanzapata.iconify.widget.IconTextView
                             android:id="@+id/textView_likes"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginTop="5dp"
                             android:layout_weight="1"
                             android:text="{fa-heart}"
                             android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:textColor="#7f8c8d" />
+                            android:textColor="#7f8c8d"
+                            android:padding="20dp" />
 
                         <com.joanzapata.iconify.widget.IconTextView
                             android:id="@+id/download"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
-                            android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
-                            android:layout_marginTop="5dp"
                             android:layout_weight="1"
                             android:shadowColor="#22000000"
                             android:shadowDx="3"
@@ -126,7 +117,8 @@
                             android:shadowRadius="1"
                             android:text="{fa-arrow-down}"
                             android:textAppearance="?android:attr/textAppearanceSmall"
-                            android:textColor="#7f8c8d" />
+                            android:textColor="#7f8c8d"
+                            android:padding="20dp" />
                     </LinearLayout>
                 </LinearLayout>
 
