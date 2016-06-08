@@ -8,4 +8,11 @@
         <item name="colorAccent">@color/primary_color_accent</item>
     </style>
 
+    <style name="FullscreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary" >@color/primary_color</item>
+        <item name="colorPrimaryDark">@color/primary_color_dark</item>
+        <item name="colorAccent">@color/primary_color_accent</item>
+    </style>
+
 </resources>

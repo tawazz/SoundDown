@@ -1,0 +1,14 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="pref_key_soundcloud"
+        android:title="SoundCloud">
+        <EditTextPreference
+            android:defaultValue=""
+            android:key="pref_username"
+            android:summary="Enter Your sound cloud username, found at the end of your soundcloud profile url"
+            android:title="Enter Your Sound Cloud User Name" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

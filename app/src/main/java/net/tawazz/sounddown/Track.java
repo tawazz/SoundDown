@@ -12,7 +12,6 @@ import net.tawazz.sounddown.helpers.WebRequest;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by tawanda on 2/10/15.
@@ -42,6 +41,7 @@ public class Track {
 
         request = WebRequest.getInstance();
         RequestQueue queue = request.getRequestQueue();
+        artwork.replace("large","crop");
         ImageRequest imageRequest = new ImageRequest(artwork, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {

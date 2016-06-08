@@ -12,17 +12,14 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -33,8 +30,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-
 
 import net.tawazz.sounddown.helpers.WebRequest;
 import net.tawazz.sounddown.mp3agic.ID3Wrapper;
@@ -53,6 +48,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SearchActivity extends AppCompatActivity implements SongsAdapter.AdapterListener {
 
@@ -79,13 +75,26 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = URLEncoder.encode(intent.getStringExtra(SearchManager.QUERY));
             searchSongs(query);
-        }else {
+        }else if(intent.getAction().equals("ACTION_JSON")){
+            Json = intent.getStringExtra("Json");
+            jsonToTracks();
+            if (tracks != null) {
+                SongsAdapter songsAdapter = new SongsAdapter(context, tracks);
+                songsAdapter.callback(SearchActivity.this);
+                songs.setAdapter(songsAdapter);
+                songs.invalidateViews();
+
+            } else {
+                Toast.makeText(SearchActivity.this, "No results", Toast.LENGTH_SHORT).show();
+            }
+        } else{
             this.explore();
         }
 
+        View.generateViewId();
         if(tracks != null) {
 
-            SongsAdapter songsAdapter = new SongsAdapter((SearchActivity)this.getApplicationContext(), tracks);
+            SongsAdapter songsAdapter = new SongsAdapter((SearchActivity)this, tracks);
             songs.setAdapter(songsAdapter);
         }
         /*
@@ -108,7 +117,7 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
             public void run() {
                 songs.invalidateViews();
             }
-        },3500);
+        },1500);
 
     }
 
@@ -195,7 +204,8 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent intent = new Intent(SearchActivity.this,SettingsActivity.class);
+            startActivityForResult(intent, RESULT_OK);
         }
 
         return super.onOptionsItemSelected(item);
@@ -341,6 +351,25 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
         });
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
+    }
+
+    /**
+     * Generate a value suitable for use in .
+     * This value will not collide with ID values generated at build time by aapt for R.id.
+     *
+     * @return a generated ID value
+     */
+    public static int generateViewId() {
+        AtomicInteger  sNextGeneratedId = new AtomicInteger(1);
+        for (;;) {
+            final int result = sNextGeneratedId.get();
+            // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
+            int newValue = result + 1;
+            if (newValue > 0x00FFFFFF) newValue = 1; // Roll over to 1, not 0.
+            if (sNextGeneratedId.compareAndSet(result, newValue)) {
+                return result;
+            }
+        }
     }
 
 }

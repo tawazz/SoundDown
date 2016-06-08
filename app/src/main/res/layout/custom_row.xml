@@ -37,7 +37,8 @@
                     android:layout_height="200dp"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentRight="true"
-                    android:scaleType="fitXY" />
+                    android:scaleType="fitXY"
+                    android:adjustViewBounds="true"/>
 
                 <TextView
                     android:id="@+id/textView_title"
@@ -58,8 +59,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/imageView_artwork"
                     android:layout_marginTop="10dp"
-                    android:weightSum="2"
-                    android:layout_marginBottom="10dp">
+                    android:weightSum="2">
 
                     <com.joanzapata.iconify.widget.IconTextView
                         android:id="@+id/textView_play"

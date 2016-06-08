@@ -22,4 +22,9 @@ public class ApplicationData extends Application {
     public static Context getContext(){
         return context;
     }
+
+    public static WebRequest getWebRequest(){
+
+        return WebRequest.getInstance();
+    }
 }
