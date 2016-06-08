@@ -15,13 +15,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +30,9 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.joanzapata.iconify.widget.IconTextView;
 
+import net.tawazz.sounddown.helpers.ApplicationData;
 import net.tawazz.sounddown.helpers.WebRequest;
 import net.tawazz.sounddown.mp3agic.ID3Wrapper;
 import net.tawazz.sounddown.mp3agic.ID3v1Tag;
@@ -57,21 +59,32 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
     private Track[] tracks;
     ProgressDialog pDialog;
     private Context context;
+    private ApplicationData appData;
     private final Handler handler = new Handler();
     private WebRequest request;
     private ActivityListener activityListener;
     private SongsAdapter songsAdapter;
+    private FloatingActionButton playBtn,nextBtn,prevBtn;
+    private IconTextView songName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         Intent intent = getIntent();
+
         view = getWindow().getDecorView().findViewById(android.R.id.content);
         songs = (ListView) view.findViewById(R.id.listView_songs);
         TextView emptyText = (TextView) view.findViewById(R.id.textView_empty);
+
+        songName = (IconTextView) view.findViewById(R.id.song_name);
+        playBtn = (FloatingActionButton) view.findViewById(R.id.play_btn);
+        nextBtn = (FloatingActionButton) view.findViewById(R.id.next_btn);
+        prevBtn = (FloatingActionButton) view.findViewById(R.id.prev_btn);
         songs.setEmptyView(emptyText);
-        context = this.getApplication();
+
+        context = this;
+        appData = (ApplicationData) getApplication();
         request = WebRequest.getInstance();
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -81,10 +94,11 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
             Json = intent.getStringExtra("Json");
             jsonToTracks();
             if (tracks != null) {
-                SongsAdapter songsAdapter = new SongsAdapter(context, tracks);
-                songsAdapter.callback(SearchActivity.this);
+                songsAdapter = new SongsAdapter(context, tracks);
+                songsAdapter.setAdapterListener(this);
                 songs.setAdapter(songsAdapter);
                 songs.invalidateViews();
+
 
             } else {
                 Toast.makeText(SearchActivity.this, "No results", Toast.LENGTH_SHORT).show();
@@ -96,23 +110,10 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
         if(tracks != null) {
 
             songsAdapter = new SongsAdapter(this, tracks);
+            songsAdapter.setAdapterListener(this);
             songs.setAdapter(songsAdapter);
             activityListener = songsAdapter;
         }
-        /*
-        songs.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        try {
-                            getSong(tracks[position],position);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-        );
-        */
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -120,6 +121,23 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
                 songs.invalidateViews();
             }
         },1500);
+
+        playBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MediaPlayer mediaPlayer = appData.mediaPlayer;
+                if(mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.pause();
+                        playBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
+                    } else if(mediaPlayer.getTrackInfo().length > 0) {
+                        mediaPlayer.start();
+                        playBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause_black_24dp));
+                    }
+                }
+
+            }
+        });
 
     }
 
@@ -311,19 +329,6 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
 
     }
 
-    @Override
-    public void primarySeekBarProgressUpdater(SeekBar seekBarProgress, final MediaPlayer mediaPlayer, final int mediaFileLengthInMilliseconds ) {
-        seekBarProgress.setProgress((int) (((float) mediaPlayer.getCurrentPosition() / mediaFileLengthInMilliseconds) * 100)); // This math construction give a percentage of "was playing"/"song length"
-        final SeekBar seekBar = seekBarProgress;
-        if (mediaPlayer.isPlaying()) {
-            Runnable notification = new Runnable() {
-                public void run() {
-                    primarySeekBarProgressUpdater(seekBar,mediaPlayer,mediaFileLengthInMilliseconds);
-                }
-            };
-            handler.postDelayed(notification,1000);
-        }
-    }
 
     public void request(String url){
         // Instantiate the RequestQueue.
@@ -336,7 +341,7 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
                         jsonToTracks();
                         if (tracks != null) {
                             songsAdapter = new SongsAdapter(context, tracks);
-                            songsAdapter.callback(SearchActivity.this);
+                            songsAdapter.setAdapterListener(SearchActivity.this);
                             activityListener = songsAdapter;
                             songs.setAdapter(songsAdapter);
                             songs.invalidateViews();
@@ -365,4 +370,55 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
         }
     }
 
+    @Override
+    public void playPause(final Track song, int pos) {
+        MediaPlayer mediaPlayer = appData.mediaPlayer;
+        if (mediaPlayer != null) {
+            if (!mediaPlayer.isPlaying()) {
+                try {
+                    mediaPlayer.setDataSource(song.getStreamUrl()); // URL to mediaplayer data source
+                    mediaPlayer.prepareAsync(); // you must call this method after setup the datasource in setDataSource method. After calling prepare() the instance of MediaPlayer starts load data from URL to internal buffer.
+                    songName.setText(R.string.buffering);
+                    playBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause_black_24dp));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            } else {
+                mediaPlayer.stop();
+                mediaPlayer.reset();
+                try {
+                    mediaPlayer.setDataSource(song.getStreamUrl()); // URL to mediaplayer data source
+                    mediaPlayer.prepareAsync(); // you must call this method after setup the datasource in setDataSource method. After calling prepare() the instance of MediaPlayer starts load data from URL to internal buffer.
+                    songName.setText(R.string.buffering);
+                    playBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause_black_24dp));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        } else {
+            mediaPlayer = new MediaPlayer();
+        }
+
+
+        final MediaPlayer finalMediaPlayer = mediaPlayer;
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                finalMediaPlayer.reset();
+                songName.setText("");
+                playBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
+            }
+        });
+
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                finalMediaPlayer.start();
+                songName.setText(song.getTitle());
+                playBtn.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause_black_24dp));
+            }
+        });
+    }
 }

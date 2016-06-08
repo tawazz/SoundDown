@@ -1,31 +1,19 @@
 package net.tawazz.sounddown;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
-import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.android.volley.toolbox.NetworkImageView;
-import com.joanzapata.iconify.widget.IconButton;
 import com.joanzapata.iconify.widget.IconTextView;
 
 import net.tawazz.sounddown.helpers.ApplicationData;
-import net.tawazz.sounddown.helpers.FontAwesome;
-import net.tawazz.sounddown.helpers.ScalingUtilities;
-import net.tawazz.sounddown.helpers.WebRequest;
 
 
 /**
@@ -36,6 +24,7 @@ class SongsAdapter extends ArrayAdapter<Track> implements ActivityListener {
     private Context activity;
     private AdapterListener listener;
     private MediaPlayer mediaPlayer;
+    private Track currentSong;
 
     @Override
     public void destroy() {
@@ -43,17 +32,33 @@ class SongsAdapter extends ArrayAdapter<Track> implements ActivityListener {
         mediaPlayer.reset();
     }
 
+    @Override
+    public void playPause(final FloatingActionButton playBtn, Track song) {
+
+
+    }
+
+    @Override
+    public void playNext() {
+
+    }
+
+    @Override
+    public void playPrev() {
+
+    }
+
     public interface AdapterListener {
 
         public void getSong(Track song, int pos);
 
-        public void primarySeekBarProgressUpdater(SeekBar seekBarProgress, final MediaPlayer mediaPlayer, final int mediaFileLengthInMilliseconds);
+        public void playPause(Track song, int pos);
     }
 
     public SongsAdapter(Context context, Track[] songs) {
         super(context, R.layout.custom_row, songs);
         activity = context;
-        ApplicationData app = (ApplicationData) activity.getApplicationContext() ;
+        ApplicationData app = (ApplicationData) activity.getApplicationContext();
         mediaPlayer = app.mediaPlayer;
     }
 
@@ -96,35 +101,11 @@ class SongsAdapter extends ArrayAdapter<Track> implements ActivityListener {
         holder.preview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (mediaPlayer != null) {
-                    if (!mediaPlayer.isPlaying()) {
-                        preview(song.getPreviewUrl(), preview);
-                    } else {
-                        mediaPlayer.stop();
-                        mediaPlayer.reset();
-                        preview.setText(getContext().getString(R.string.play));
-                    }
-                } else {
-                    mediaPlayer = new MediaPlayer();
+                try {
+                    listener.playPause(song, pos);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-
-                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        preview.setText(getContext().getString(R.string.play));
-                        mediaPlayer.reset();
-                    }
-                });
-
-                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        mediaPlayer.start();
-                        preview.setText(getContext().getString(R.string.pause));
-                    }
-                });
             }
         });
 
@@ -142,7 +123,7 @@ class SongsAdapter extends ArrayAdapter<Track> implements ActivityListener {
         return customView;
     }
 
-    public void callback(AdapterListener listener) {
+    public void setAdapterListener(AdapterListener listener) {
         this.listener = listener;
     }
 
