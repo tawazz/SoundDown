@@ -356,11 +356,4 @@ public class SearchActivity extends AppCompatActivity implements SongsAdapter.Ad
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(activityListener != null) {
-            activityListener.destroy();
-        }
-    }
 }

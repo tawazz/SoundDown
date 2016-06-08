@@ -22,6 +22,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.joanzapata.iconify.widget.IconButton;
 import com.joanzapata.iconify.widget.IconTextView;
 
+import net.tawazz.sounddown.helpers.ApplicationData;
 import net.tawazz.sounddown.helpers.FontAwesome;
 import net.tawazz.sounddown.helpers.ScalingUtilities;
 import net.tawazz.sounddown.helpers.WebRequest;
@@ -52,7 +53,8 @@ class SongsAdapter extends ArrayAdapter<Track> implements ActivityListener {
     public SongsAdapter(Context context, Track[] songs) {
         super(context, R.layout.custom_row, songs);
         activity = context;
-        mediaPlayer = new MediaPlayer();
+        ApplicationData app = (ApplicationData) activity.getApplicationContext() ;
+        mediaPlayer = app.mediaPlayer;
     }
 
     @Override
